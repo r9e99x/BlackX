@@ -54,6 +54,8 @@ struct BlocodeApp: App {
             // macOS: 와이드(분할) 레이아웃이 항상 성립하도록 최소 윈도우 크기 지정
             .frame(minWidth: 1080, minHeight: 720)
             #endif
+            // 앱 실행 시 배경음악 재생 시작 (설정에서 꺼져 있으면 내부적으로 무시됨)
+            .onAppear { SoundService.shared.startBackgroundMusic() }
         }
         // ProgressService가 소유한 단일 컨테이너를 주입 (스토어 일원화)
         .modelContainer(ProgressService.shared.modelContainer)

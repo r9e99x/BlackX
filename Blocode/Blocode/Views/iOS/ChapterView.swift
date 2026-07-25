@@ -50,7 +50,10 @@ struct ChapterView: View {
                     VStack(alignment: .leading, spacing: 0) {
                         Spacer().frame(height: geo.safeAreaInsets.top + 16)
 
-                        Button { if !navPath.isEmpty { navPath.removeLast() } } label: {
+                        Button {
+                            SoundService.shared.play(.buttonTap)
+                            if !navPath.isEmpty { navPath.removeLast() }
+                        } label: {
                             HStack(spacing: 4) {
                                 Image(systemName: "chevron.left")
                                     .font(.system(size: 12, weight: .bold))
@@ -135,7 +138,10 @@ struct ChapterView: View {
             Spacer().frame(height: safeAreaTop)
 
             // 뒤로가기 버튼
-            Button { if !navPath.isEmpty { navPath.removeLast() } } label: {
+            Button {
+                            SoundService.shared.play(.buttonTap)
+                            if !navPath.isEmpty { navPath.removeLast() }
+                        } label: {
                 HStack(spacing: 4) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 12, weight: .bold))
@@ -292,7 +298,8 @@ struct ChapterView: View {
 
         return Button {
             if locked {
-                // 잠긴 스테이지: 해금 조건 팝업 표시
+                // 잠긴 스테이지: 전용 잠금 사운드 + 해금 조건 팝업 표시
+                SoundService.shared.play(.lockButton)
                 withAnimation(.easeInOut(duration: 0.2)) {
                     lockInfo = LockInfo(
                         title: "아직 잠겨 있어요",
@@ -302,6 +309,7 @@ struct ChapterView: View {
                 }
             } else if cleared {
                 // 클리어했으면 재도전 확인 팝업 표시 — "다시 하기" 선택 시 스테이지로 이동 후 팝업 닫기
+                SoundService.shared.play(.buttonTap)
                 withAnimation(.easeInOut(duration: 0.2)) {
                     retryConfirmInfo = RetryConfirmInfo(
                         title: "이미 클리어한 스테이지예요",
@@ -314,6 +322,7 @@ struct ChapterView: View {
                     )
                 }
             } else {
+                SoundService.shared.play(.buttonTap)
                 navPath.append(AppRoute.stage(chapter: stage.chapter, number: stage.stageNumber))
             }
         } label: {

@@ -263,15 +263,30 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 10) {
             sectionLabel("피드백")
             settingsCard {
-                // 효과음 토글
-                settingsRow(
-                    icon: "speaker.wave.2.fill",
-                    iconColor: Color(red: 0.98, green: 0.72, blue: 0.28),  // 노란 계열
-                    title: "효과음"
-                ) {
-                    Toggle("", isOn: $settings.soundEnabled)
-                        .labelsHidden()
-                        .tint(toggleTint)
+                VStack(spacing: 0) {
+                    // 효과음 토글
+                    settingsRow(
+                        icon: "speaker.wave.2.fill",
+                        iconColor: Color(red: 0.98, green: 0.72, blue: 0.28),  // 노란 계열
+                        title: "효과음"
+                    ) {
+                        Toggle("", isOn: $settings.soundEnabled)
+                            .labelsHidden()
+                            .tint(toggleTint)
+                    }
+
+                    rowDivider
+
+                    // 배경음악 토글
+                    settingsRow(
+                        icon: "music.note",
+                        iconColor: Color(red: 0.65, green: 0.52, blue: 0.82),  // 보라 계열
+                        title: "배경음악"
+                    ) {
+                        Toggle("", isOn: $settings.musicEnabled)
+                            .labelsHidden()
+                            .tint(toggleTint)
+                    }
                 }
             }
         }

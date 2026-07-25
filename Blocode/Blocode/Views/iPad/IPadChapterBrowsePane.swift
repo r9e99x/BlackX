@@ -75,6 +75,7 @@ struct IPadChapterBrowsePane: View {
                 let unlocked = chapterSelectVM.isUnlocked(chapter)
                 Button {
                     guard unlocked else {
+                        SoundService.shared.play(.lockButton)
                         withAnimation(.easeInOut(duration: 0.2)) {
                             lockInfo = LockInfo(title: "아직 잠겨 있어요",
                                                 message: chapterSelectVM.lockMessage(for: chapter),
@@ -83,6 +84,7 @@ struct IPadChapterBrowsePane: View {
                         return
                     }
                     guard chapter.number != chapterNumber else { return }
+                    SoundService.shared.play(.buttonTap)
                     onSelectChapter(chapter.number)
                 } label: {
                     HStack(spacing: 12) {
@@ -130,12 +132,14 @@ struct IPadChapterBrowsePane: View {
                     let cleared = vm.isCleared(stage)
                     Button {
                         if locked {
+                            SoundService.shared.play(.lockButton)
                             withAnimation(.easeInOut(duration: 0.2)) {
                                 lockInfo = LockInfo(title: "아직 잠겨 있어요",
                                                     message: vm.lockMessage(for: stage),
                                                     accentColor: chapterColor)
                             }
                         } else {
+                            SoundService.shared.play(.buttonTap)
                             selectedStage = stage.stageNumber
                         }
                     } label: {
@@ -294,6 +298,7 @@ struct IPadChapterBrowsePane: View {
 
                 // 시작하기 버튼 — iOS 3D 버튼과 동일한 ThreeDSurface + 눌림 효과 (터치용으로 살짝 더 큼)
                 Button {
+                    SoundService.shared.play(.buttonTap)
                     onStart(chapterNumber, stageNumber)
                 } label: {
                     let frontH: CGFloat = 58

@@ -54,6 +54,14 @@ final class SettingsService: ObservableObject {
         didSet { UserDefaults.standard.set(soundEnabled, forKey: "soundEnabled") }
     }
 
+    /// 배경음악 활성화 여부 — 변경 시 UserDefaults에 저장 + 즉시 재생/정지 반영
+    @Published var musicEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(musicEnabled, forKey: "musicEnabled")
+            SoundService.shared.setMusicEnabled(musicEnabled)
+        }
+    }
+
     /// 블럭 실행 속도 배율 (0.5 / 1.0 / 2.0) — 변경 시 UserDefaults에 자동 저장
     @Published var executionSpeed: Double {
         didSet { UserDefaults.standard.set(executionSpeed, forKey: "executionSpeed") }
@@ -69,6 +77,8 @@ final class SettingsService: ObservableObject {
         self.theme          = ThemePreference(rawValue: themeRaw) ?? .system
         // 저장된 효과음 설정 로드 (없으면 기본값 true)
         self.soundEnabled   = ud.object(forKey: "soundEnabled")  as? Bool   ?? true
+        // 저장된 배경음악 설정 로드 (없으면 기본값 true)
+        self.musicEnabled   = ud.object(forKey: "musicEnabled")  as? Bool   ?? true
         // 저장된 실행 속도 로드 (없으면 기본값 1.0배속)
         self.executionSpeed = ud.object(forKey: "executionSpeed") as? Double ?? 1.0
     }

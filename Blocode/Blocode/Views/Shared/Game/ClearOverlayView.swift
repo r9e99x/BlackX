@@ -70,7 +70,10 @@ struct ClearOverlayView: View {
     #if os(macOS)
     /// 맥 전용 — 창 우상단 절대 위치에 고정되는 닫기 버튼 (스타일은 기존 X버튼과 동일)
     private var macTopRightCloseButton: some View {
-        Button(action: onClose) {
+        Button {
+            SoundService.shared.play(.buttonTap)
+            onClose()
+        } label: {
             Image(systemName: "xmark")
                 .font(.system(size: 13, weight: .bold))
                 .foregroundStyle(Color.secondary)
@@ -150,7 +153,10 @@ struct ClearOverlayView: View {
             // 하단 버튼 영역
             VStack(spacing: 14) {
                 // 다음 스테이지 / 챕터 목록 버튼
-                Button(action: onNext) {
+                Button {
+                    SoundService.shared.play(.buttonTap)
+                    onNext()
+                } label: {
                     Text(isLastStage ? "챕터 목록으로" : "다음 스테이지로")
                         .font(.system(size: 17, weight: .bold))
                         .foregroundStyle(.white)
@@ -162,7 +168,10 @@ struct ClearOverlayView: View {
                 .buttonStyle(.plain)
 
                 // 다시 도전 버튼 (텍스트 버튼)
-                Button(action: onRetry) {
+                Button {
+                    SoundService.shared.play(.buttonTap)
+                    onRetry()
+                } label: {
                     Text("다시 도전하기")
                         .font(.system(size: 15))
                         .foregroundStyle(.secondary)
@@ -190,7 +199,10 @@ struct ClearOverlayView: View {
                 Spacer()
                 // x 버튼으로 닫기 — 맥은 창 우상단에 별도 고정되므로 여기선 숨김(중복 방지)
                 #if !os(macOS)
-                Button(action: onClose) {
+                Button {
+                    SoundService.shared.play(.buttonTap)
+                    onClose()
+                } label: {
                     Image(systemName: "xmark")
                         .font(.system(size: 13, weight: .bold))
                         .foregroundStyle(Color.secondary)  // UIColor.secondaryLabel과 동일 톤 (크로스플랫폼)
@@ -249,7 +261,10 @@ struct ClearOverlayView: View {
             // 하단 버튼 2개
             HStack(spacing: 12) {
                 // 왼쪽 — 다시 (라이트: 기존 다크 브라운 / 다크: 슬레이트)
-                Button(action: onRetry) {
+                Button {
+                    SoundService.shared.play(.buttonTap)
+                    onRetry()
+                } label: {
                     HStack(spacing: 6) {
                         Image(systemName: "arrow.counterclockwise")
                             .font(.system(size: 14, weight: .semibold))
@@ -265,7 +280,10 @@ struct ClearOverlayView: View {
                 .buttonStyle(.plain)
 
                 // 오른쪽 — 넘어가기 / 마무리 (마지막 스테이지면 onFinish로 스테이지 목록 이동)
-                Button(action: isLastStage ? onFinish : onNext) {
+                Button {
+                    SoundService.shared.play(.buttonTap)
+                    if isLastStage { onFinish() } else { onNext() }
+                } label: {
                     Text(isLastStage ? "마무리" : "넘어가기")
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(.primary)
@@ -355,7 +373,10 @@ struct ClearOverlayView: View {
     private var closeButton: some View {
         HStack {
             Spacer()
-            Button(action: onClose) {
+            Button {
+                SoundService.shared.play(.buttonTap)
+                onClose()
+            } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 13, weight: .bold))
                     .foregroundStyle(Color.secondary)  // UIColor.secondaryLabel과 동일 톤 (크로스플랫폼)

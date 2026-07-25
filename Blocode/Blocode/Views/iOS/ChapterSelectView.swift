@@ -97,7 +97,10 @@ struct ChapterSelectView: View {
             Spacer()
 
             // 홈 버튼 — NavigationStack에서 한 단계 뒤로
-            Button { if !navPath.isEmpty { navPath.removeLast() } } label: {
+            Button {
+                SoundService.shared.play(.buttonTap)
+                if !navPath.isEmpty { navPath.removeLast() }
+            } label: {
                 Image(systemName: "house")
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(Color.secondary)  // UIColor.secondaryLabel과 동일 톤 (크로스플랫폼)
@@ -255,9 +258,11 @@ struct ChapterSelectView: View {
             .contentShape(Rectangle())
             .onTapGesture {
                 if unlocked && chapter.stageCount > 0 {
+                    SoundService.shared.play(.buttonTap)
                     navPath.append(AppRoute.chapter(chapter.number))
                 } else if !unlocked {
-                    // 잠긴 챕터: 해금 조건 팝업 표시
+                    // 잠긴 챕터: 전용 잠금 사운드 + 해금 조건 팝업 표시
+                    SoundService.shared.play(.lockButton)
                     withAnimation(.easeInOut(duration: 0.2)) {
                         lockInfo = LockInfo(
                             title: "아직 잠겨 있어요",

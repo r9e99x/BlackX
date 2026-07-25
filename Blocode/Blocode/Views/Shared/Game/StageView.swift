@@ -380,6 +380,7 @@ struct StageView: View {
             // 맥은 NavigationStack 툴바에 자체 뒤로가기 버튼을 따로 두므로 이 버튼은 숨김(중복 방지)
             if showsOwnBackButton {
                 Button {
+                    SoundService.shared.play(.buttonTap)
                     if !navPath.isEmpty { navPath.removeLast() }
                 } label: {
                     Image(systemName: "chevron.left")
@@ -476,7 +477,10 @@ struct StageView: View {
     /// 상단바용 소형 아이콘 버튼 — 되돌리기/설정
     /// iOS 컨트롤 바와 동일한 공용 Bevel3DButtonLabel 사용 (색상·베벨 강도 규칙 동일, 크기만 축소)
     private func macIconButton(icon: String, isPressed: Binding<Bool>, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
+        Button {
+            SoundService.shared.play(.buttonTap)
+            action()
+        } label: {
             Bevel3DButtonLabel(color: Color.controlIconButtonFace, width: 34, height: 34, cornerRadius: 10,
                                topDepth: 1.5, botDepth: 2,
                                topOverlayOpacity: colorScheme == .dark ? 0.12 : 0.28,
@@ -497,7 +501,10 @@ struct StageView: View {
             ? Color.runButtonInactiveGray
             : Color.runButtonActiveMint
 
-        return Button { viewModel.run() } label: {
+        return Button {
+            SoundService.shared.play(.buttonTap)
+            viewModel.run()
+        } label: {
             Bevel3DButtonLabel(color: color, width: 84, height: 34, cornerRadius: 10,
                                topDepth: 1.5, botDepth: 2,
                                isPressed: isMacRunPressed) {

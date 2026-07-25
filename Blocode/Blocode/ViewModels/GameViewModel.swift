@@ -119,6 +119,7 @@ final class GameViewModel: ObservableObject {
         guard gameState == .idle else { return }
         let block = Block(type: type)
         codeBlocks.append(block)
+        SoundService.shared.play(.blockAdd)
     }
 
     /// 특정 인덱스의 블럭 삭제 — idle 상태이고 유효한 인덱스일 때만 허용
@@ -132,6 +133,7 @@ final class GameViewModel: ObservableObject {
     func moveBlock(from source: IndexSet, to destination: Int) {
         guard gameState == .idle else { return }
         codeBlocks.move(fromOffsets: source, toOffset: destination)
+        SoundService.shared.play(.blockReorder)
     }
 
     /// 컨테이너 블럭(repeat / if / function)에 자식 블럭 추가
@@ -262,6 +264,7 @@ final class GameViewModel: ObservableObject {
         // 인덱스가 범위를 벗어나지 않도록 클램핑
         let safeIndex = min(max(0, index), codeBlocks.count)
         codeBlocks.insert(block, at: safeIndex)
+        SoundService.shared.play(.blockAdd)
     }
 
     /// repeat 블럭의 반복 횟수 변경 (1~10회로 제한 — 자식/손자 조작 함수와 동일 규칙)
@@ -479,6 +482,7 @@ final class GameViewModel: ObservableObject {
         if let pair = scene.mapData.portals?.first(where: { $0.a == position || $0.b == position }) {
             let destination = pair.a == position ? pair.b : pair.a
             scene.teleportCharacter(to: destination)
+            SoundService.shared.play(.portal)
         }
     }
 
@@ -493,6 +497,7 @@ final class GameViewModel: ObservableObject {
         }
         collectedItems.insert(position)
         scene.collectItem(at: position)
+        SoundService.shared.play(.itemCollect)
         return true
     }
 
@@ -508,6 +513,7 @@ final class GameViewModel: ObservableObject {
             openedGates.insert(gate)
             scene.openGate(at: gate)
         }
+        SoundService.shared.play(.switchActivate)
         return true
     }
 
@@ -598,6 +604,7 @@ final class GameViewModel: ObservableObject {
         clearedStars = stars
         currentBlockPath = nil
         gameState = .success
+        SoundService.shared.play(stars == 3 ? .clearThreeStar : .clearLowStar)
 
         // ProgressService에 클리어 기록 저장 (더 좋은 기록이면 갱신)
         ProgressService.shared.recordClear(
@@ -613,6 +620,7 @@ final class GameViewModel: ObservableObject {
         failedBlockPath = path    // 실패한 블럭 빨간 하이라이트 (경로 기반)
         failureMessage = message  // 토스트 배너 메시지
         gameState = .failure
+        SoundService.shared.play(.gameFail)
     }
 
     // MARK: - 타이머

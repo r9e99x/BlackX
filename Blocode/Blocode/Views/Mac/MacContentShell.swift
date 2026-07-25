@@ -503,8 +503,10 @@ struct MacContentShell: View {
             .contentShape(Rectangle())
             .onTapGesture {
                 if unlocked && chapter.stageCount > 0 {
+                    SoundService.shared.play(.buttonTap)
                     browsingChapter = chapter.number
                 } else if !unlocked {
+                    SoundService.shared.play(.lockButton)
                     withAnimation(.easeInOut(duration: 0.2)) {
                         lockInfo = LockInfo(title: "아직 잠겨 있어요",
                                             message: chapterSelectVM.lockMessage(for: chapter),

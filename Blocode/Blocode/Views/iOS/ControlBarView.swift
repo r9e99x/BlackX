@@ -44,6 +44,7 @@ struct ControlBarView: View {
             // 왼쪽: 리셋 / 전체 초기화 버튼
             // 앞면: 다크에서 배경에 묻히지 않는 슬레이트 / 베벨: 다크에서만 강도 완화 (라이트는 기존 그대로)
             Button {
+                SoundService.shared.play(.buttonTap)
                 if viewModel.characterMoved { viewModel.reset() }
                 else { viewModel.fullReset() }
             } label: {
@@ -62,7 +63,10 @@ struct ControlBarView: View {
             .frame(maxWidth: .infinity)
 
             // 가운데: 실행 버튼
-            Button { viewModel.run() } label: {
+            Button {
+                SoundService.shared.play(.buttonTap)
+                viewModel.run()
+            } label: {
                 Bevel3DButtonLabel(color: runButtonColor, width: 152, height: 54, cornerRadius: 27,
                                    isPressed: isRunPressed) {
                     HStack(spacing: 8) {
@@ -88,7 +92,10 @@ struct ControlBarView: View {
 
             // 오른쪽: 설정 버튼
             // 앞면/베벨 색상 규칙은 리셋 버튼과 동일 (다크에서만 조정, 라이트는 기존 그대로)
-            Button { showSettings = true } label: {
+            Button {
+                SoundService.shared.play(.buttonTap)
+                showSettings = true
+            } label: {
                 Bevel3DButtonLabel(color: Color.controlIconButtonFace, width: 54, height: 54, cornerRadius: 17,
                                    topOverlayOpacity: colorScheme == .dark ? 0.12 : 0.28,
                                    bottomOverlayOpacity: colorScheme == .dark ? 0.30 : 0.22,

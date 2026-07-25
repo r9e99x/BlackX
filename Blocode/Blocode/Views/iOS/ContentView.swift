@@ -145,6 +145,7 @@ struct ContentView: View {
     /// (컴팩트: 헤더 오른쪽 / 와이드: 화면 우상단 오버레이로 공용 사용)
     private var settingsButton: some View {
         Button {
+            SoundService.shared.play(.buttonTap)
             showSettings = true
         } label: {
             Image(systemName: "gearshape")
@@ -368,6 +369,7 @@ struct ContentView: View {
         let isFirstTime = vm.isFirstTime
 
         return Button {
+            SoundService.shared.play(.buttonTap)
             if let next = next {
                 // 다음 스테이지로 바로 이동
                 navPath.append(AppRoute.stage(chapter: next.chapter, number: next.stage))
@@ -458,6 +460,7 @@ struct ContentView: View {
                                          dark: (0.13, 0.14, 0.17))
 
         return Button {
+            SoundService.shared.play(.buttonTap)
             navPath.append(AppRoute.chapterSelect)
         } label: {
             ThreeDSurface(topDepth: topD, bottomDepth: botD, isPressed: isBrowsePressed) {

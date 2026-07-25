@@ -62,7 +62,10 @@ struct LockInfoOverlay: View {
 
                 // 확인 버튼 (3D + 눌림 효과)
                 // 색상: 라이트는 기존 darkInk+탄색 베벨 그대로 / 다크는 슬레이트 톤 (slateButton* 다이나믹 컬러)
-                Button(action: onClose) {
+                Button {
+                    SoundService.shared.play(.buttonTap)
+                    onClose()
+                } label: {
                     ThreeDSurface(topDepth: confirmTopDepth, bottomDepth: confirmBotDepth, isPressed: isConfirmPressed) {
                         // ① 위 뒷면 — 라이트 #807869 / 다크 밝은 슬레이트
                         RoundedRectangle(cornerRadius: 25).fill(Color.slateButtonTopBack)
