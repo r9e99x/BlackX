@@ -60,26 +60,48 @@ struct OnboardingView: View {
     // MARK: - 본문
 
     var body: some View {
-        ZStack {
-            // 앱 배경색
-            Color.appBackground.ignoresSafeArea()
+        GeometryReader { rootGeo in
+            // 세로 공간이 부족한 경우(아이폰 가로모드) — 하단 버튼 크기도 같이 줄여야
+            // 슬라이드 콘텐츠 키운 만큼 다시 잘리지 않음. pageContent 내부와 동일한 기준
+            let isCompactHeight = rootGeo.size.height < 500
 
-            VStack(spacing: 0) {
+            ZStack {
+                // 앱 배경색
+                Color.appBackground.ignoresSafeArea()
 
-                // MARK: 상단 바 (페이지 카운터 + 건너뛰기)
-                topBar
+                VStack(spacing: 0) {
+
+                    // MARK: 상단 바 (페이지 카운터 + 건너뛰기)
+                    topBar
 
                 // MARK: 슬라이드 콘텐츠
                 #if os(iOS)
-                // iOS: 페이지 스타일 탭뷰로 스와이프 전환 (기존과 동일)
-                TabView(selection: $currentPage) {
-                    ForEach(pages.indices, id: \.self) { i in
-                        pageContent(pages[i])
-                            .tag(i)
+                if isPadIdiom {
+                    // 아이패드: 기존처럼 스와이프 가능한 슬라이드 형식 유지 — 다만 TabView(.page)가
+                    // 컨테이너 크기를 명시적으로 안 주면 옆 페이지가 살짝 보이는 버그가 있어서
+                    // GeometryReader로 각 페이지 크기를 화면에 정확히 맞춰 그 버그만 고침
+                    GeometryReader { geo in
+                        TabView(selection: $currentPage) {
+                            ForEach(pages.indices, id: \.self) { i in
+                                pageContent(pages[i])
+                                    .frame(width: geo.size.width, height: geo.size.height)
+                                    .tag(i)
+                            }
+                        }
+                        .tabViewStyle(.page(indexDisplayMode: .never))
+                        .animation(.easeInOut(duration: 0.3), value: currentPage)
                     }
+                } else {
+                    // 아이폰: 페이지 스타일 탭뷰로 스와이프 전환 (기존과 완전히 동일, 무변경)
+                    TabView(selection: $currentPage) {
+                        ForEach(pages.indices, id: \.self) { i in
+                            pageContent(pages[i])
+                                .tag(i)
+                        }
+                    }
+                    .tabViewStyle(.page(indexDisplayMode: .never))
+                    .animation(.easeInOut(duration: 0.3), value: currentPage)
                 }
-                .tabViewStyle(.page(indexDisplayMode: .never))
-                .animation(.easeInOut(duration: 0.3), value: currentPage)
                 #else
                 // macOS: 페이지 스타일 TabView 미지원 — 현재 페이지만 표시하고 "다음" 버튼으로 전환
                 pageContent(pages[currentPage])
@@ -89,12 +111,18 @@ struct OnboardingView: View {
                     .frame(maxHeight: .infinity)
                 #endif
 
-                // MARK: 하단 (점 인디케이터 + 버튼)
-                bottomBar
+                    // MARK: 하단 (점 인디케이터 + 버튼)
+                    // 아이패드에서 상단바·콘텐츠는 화면 전체 폭을 쓰지만, 버튼까지 그만큼 길어지면
+                    // 어색해서 여기만 따로 640pt로 제한(맥·아이폰은 이미 아래 전체 캡에 걸려 있어 무변화)
+                    bottomBar(isCompactHeight: isCompactHeight)
+                        .frame(maxWidth: 640)
+                        .frame(maxWidth: .infinity)
+                }
+                // 맥은 온보딩 콘텐츠를 중앙 640pt로 제한(기존 그대로), 아이패드는 상단바·콘텐츠가
+                // 화면 전체 폭을 쓰게 둠(건너뛰기 버튼이 화면 진짜 코너에 위치하도록, 버튼 폭은 위에서 별도 제한)
+                .frame(maxWidth: isPadIdiom ? .infinity : 640)
+                .frame(maxWidth: .infinity)
             }
-            // 와이드 화면(아이패드·맥)에선 온보딩 콘텐츠를 중앙 640pt로 제한 (아이폰 영향 없음)
-            .frame(maxWidth: 640)
-            .frame(maxWidth: .infinity)
         }
     }
 
@@ -124,42 +152,59 @@ struct OnboardingView: View {
     // MARK: - 슬라이드 콘텐츠
 
     private func pageContent(_ page: OnboardingPage) -> some View {
-        VStack(spacing: 0) {
+        GeometryReader { geo in
+            // 세로 공간이 부족한 경우(아이폰 가로모드) — 일러스트/텍스트가 예전 세로모드 크기
+            // 그대로 나오면 위아래로 잘림. 폭이 아니라 "높이"로 판단해야 아이패드 가로모드
+            // (높이 충분)와 정확히 구분되고, 다른 화면 전부 무변화로 유지됨
+            let isCompactHeight = geo.size.height < 500
 
-            Spacer()
+            VStack(spacing: 0) {
 
-            // 일러스트 영역
-            page.illustration
-                .frame(height: 280)
+                Spacer(minLength: 0)
 
-            Spacer()
+                // 일러스트 영역 — 원본 크기(280×280)로 배치한 뒤, 세로 공간이 부족할 때만
+                // scaleEffect로 통째로 축소(내부에 절대좌표 장식 요소가 있어 frame만 줄이면
+                // 그 요소들이 밖으로 잘려나감 — 비율 그대로 축소해야 안전)
+                page.illustration
+                    .frame(width: 280, height: 280)
+                    .scaleEffect(isCompactHeight ? 0.62 : 1.0)
+                    .frame(height: isCompactHeight ? 174 : 280)
 
-            // 텍스트 영역 — 하단 정렬
-            VStack(alignment: .leading, spacing: 10) {
-                // 큰 제목 — Georgia Italic + 기울임 변환
-                Text(page.title)
-                    .font(.custom("Georgia-Italic", size: 36))
-                    .foregroundStyle(.primary)
-                    .transformEffect(CGAffineTransform(a: 1, b: 0, c: -0.10, d: 1, tx: 0, ty: 0))
-                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 0)
 
-                // 설명 텍스트
-                Text(page.description)
-                    .font(.system(size: 15, weight: .regular))
-                    .foregroundStyle(.secondary)
-                    .lineSpacing(4)
-                    .fixedSize(horizontal: false, vertical: true)
+                // 텍스트 영역 — 하단 정렬
+                VStack(alignment: .leading, spacing: isCompactHeight ? 5 : 10) {
+                    // 큰 제목 — Georgia Italic + 기울임 변환
+                    Text(page.title)
+                        .font(.custom("Georgia-Italic", size: isCompactHeight ? 25 : 36))
+                        .foregroundStyle(.primary)
+                        .transformEffect(CGAffineTransform(a: 1, b: 0, c: -0.10, d: 1, tx: 0, ty: 0))
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    // 설명 텍스트
+                    Text(page.description)
+                        .font(.system(size: isCompactHeight ? 13 : 15, weight: .regular))
+                        .foregroundStyle(.secondary)
+                        .lineSpacing(isCompactHeight ? 2 : 4)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 30)
+                .padding(.bottom, isCompactHeight ? 10 : 32)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 30)
-            .padding(.bottom, 32)
+            // 콘텐츠 자체는 예전과 동일하게 640pt로 제한하고 가운데 정렬 — 아이패드에서 페이지
+            // 슬롯 자체는 화면 전체 폭이어야 옆 페이지 피킹 버그가 안 생기지만(호출부에서 처리),
+            // 그 안의 텍스트·일러스트까지 전체 폭으로 늘어나면 텍스트가 왼쪽에 치우쳐 보이고
+            // 코드블럭 미리보기 카드도 과하게 넓어져서 이렇게 안쪽 콘텐츠만 따로 좁힘
+            .frame(maxWidth: 640)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 
     // MARK: - 하단 바
 
-    private var bottomBar: some View {
-        VStack(spacing: 20) {
+    private func bottomBar(isCompactHeight: Bool) -> some View {
+        VStack(spacing: isCompactHeight ? 10 : 20) {
 
             // 점 인디케이터
             HStack(spacing: 6) {
@@ -172,28 +217,32 @@ struct OnboardingView: View {
             }
 
             // 다음 / 시작하기 버튼
-            nextButton
+            nextButton(isCompactHeight: isCompactHeight)
         }
         .padding(.horizontal, 24)
-        .padding(.bottom, 40)
+        .padding(.bottom, isCompactHeight ? 16 : 40)
     }
 
     // MARK: - 다음 버튼 (3D 다크 스타일)
 
     @State private var isNextPressed = false
 
-    private var nextButton: some View {
-        let frontH:  CGFloat = 56
-        let topD:    CGFloat = 0.8
-        let botD:    CGFloat = 2.5
-        let cr:      CGFloat = 18
+    private func nextButton(isCompactHeight: Bool) -> some View {
+        // 아이폰 가로모드(세로 공간 부족)에서는 슬라이드 콘텐츠를 키운 만큼 버튼은 살짝 줄임
+        let frontH:  CGFloat = isCompactHeight ? 42 : 56
+        let topD:    CGFloat = isCompactHeight ? 0.6 : 0.8
+        let botD:    CGFloat = isCompactHeight ? 1.8 : 2.5
+        let cr:      CGFloat = isCompactHeight ? 14 : 18
+        let fontSize: CGFloat = isCompactHeight ? 14 : 17
         let isLast   = currentPage == pages.count - 1
         let label    = isLast ? "시작하기" : "다음  ›"
 
-        // 어두운 다크 버튼 색상
-        let frontColor   = Color.darkInk
-        let topBackColor = Color.bevelTopBack
-        let botBackColor = Color.bevelBottomBack
+        // 어두운 다크 버튼 색상 — 라이트: darkInk/bevel*과 동일 값 / 다크: 슬레이트 톤으로 전환
+        // (darkInk/bevelTopBack/bevelBottomBack은 라이트·다크 무관 고정값이라 다크모드 배경과
+        // 충돌했음 — 다른 다크 버튼들과 동일하게 slateButton* 다이나믹 컬러로 교체)
+        let frontColor   = Color.slateButtonFace
+        let topBackColor = Color.slateButtonTopBack
+        let botBackColor = Color.slateButtonBottomBack
 
         return Button {
             withAnimation(.easeInOut(duration: 0.3)) {
@@ -221,7 +270,7 @@ struct OnboardingView: View {
                         RoundedRectangle(cornerRadius: cr).fill(Color.black.opacity(0.10))
                     }
                     Text(label)
-                        .font(.system(size: 17, weight: .semibold))
+                        .font(.system(size: fontSize, weight: .semibold))
                         .foregroundStyle(.white)
                 }
                 .frame(maxWidth: .infinity)
@@ -457,11 +506,13 @@ struct OnboardingView: View {
     // MARK: - 미니 블럭 아이콘 (환영 슬라이드용)
 
     /// 홈 화면과 동일한 3D 블럭 아이콘
+    /// 캐릭터/앱 로고와 동일한 다이나믹 컬러 세트 사용(라이트: darkInk/bevel*/arrowCream과 동일 값,
+    /// 다크: 밝은 몸체 — nextButton과 같은 이유로 고정 라이트색 대신 다크모드 대응 색상으로 교체)
     private func miniBlockIcon(size: CGFloat, topD: CGFloat, botD: CGFloat, cr: CGFloat) -> some View {
-        let frontColor   = Color.darkInk
-        let topBackColor = Color.bevelTopBack
-        let botBackColor = Color.bevelBottomBack
-        let arrowColor   = Color.arrowCream
+        let frontColor   = Color.characterBody
+        let topBackColor = Color.characterTopBack
+        let botBackColor = Color.characterBottomBack
+        let arrowColor   = Color.characterArrow
 
         return ThreeDSurface(topDepth: topD, bottomDepth: botD) {
             RoundedRectangle(cornerRadius: cr).fill(topBackColor)
