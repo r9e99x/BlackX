@@ -41,12 +41,48 @@ struct ChapterView: View {
         // (기존 UIApplication 기반 조회는 macOS에서 컴파일 불가 + 폴백 상수 의존이라 교체)
         GeometryReader { geo in
             if geo.size.width >= LayoutBreakpoint.wide {
-                // ── 와이드(아이패드·맥): 좌측 챕터 헤더 패널 + 우측 스테이지 목록 분할 ──
+                // ── 와이드(아이폰 가로모드): 좌측 챕터 헤더 패널 + 우측 스테이지 목록 분할 ──
+                // 헤더는 세로모드의 풀블리드 배너 대신, 맥/아이패드의 챕터 브라우저와 동일한
+                // "작은 둥근 카드" 스타일(wideChapterHeaderCard)을 사용 — 세로모드 chapterHeader는 무변경
                 HStack(alignment: .top, spacing: 0) {
-                    // 왼쪽 — 챕터 정보 패널 (색상 헤더를 고정 폭 카드로 사용)
-                    chapterHeader(safeAreaTop: geo.safeAreaInsets.top)
-                        .frame(width: 380)
-                        .frame(maxHeight: .infinity, alignment: .top)
+                    // 왼쪽 — 뒤로가기 + 챕터 카드 (맥/아이패드는 별도 챕터목록 컬럼에 뒤로가기가 있지만
+                    // 아이폰엔 그 컬럼이 없어서 카드 위에 별도로 배치)
+                    VStack(alignment: .leading, spacing: 0) {
+                        Spacer().frame(height: geo.safeAreaInsets.top + 16)
+
+                        Button { if !navPath.isEmpty { navPath.removeLast() } } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "chevron.left")
+                                    .font(.system(size: 12, weight: .bold))
+                                Text("CHAPTERS").tracking(1)
+                            }
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 12)
+
+                        wideChapterHeaderCard
+
+                        // 카드 아래 빈 공간의 정중앙에 챕터 한 줄 설명 배치
+                        // (양쪽에 Spacer를 둬서 남는 공간을 정확히 반씩 나눠 가운데 정렬)
+                        // 폰트는 홈 화면 인용구(ContentView.quoteSection)와 완전히 동일하게 맞춤 —
+                        // 한글은 .italic()이나 .design(.serif)가 안 먹혀서(한글 서체엔 진짜 이탤릭이
+                        // 없음), 인용구와 동일하게 Georgia-Italic 폰트 이름 + 수동 기울임 변환을 사용
+                        Spacer(minLength: 0)
+                        if let description = ChapterCatalog.chapter(vm.chapter)?.description {
+                            Text(description)
+                                .font(.custom("Georgia-Italic", size: 22))
+                                .foregroundStyle(Color.primary.opacity(0.55))
+                                .multilineTextAlignment(.center)
+                                .transformEffect(CGAffineTransform(a: 1, b: 0, c: -0.12, d: 1, tx: 0, ty: 0))
+                                .padding(.horizontal, 32)
+                        }
+                        Spacer(minLength: 0)
+                    }
+                    .frame(width: 380)
+                    .frame(maxHeight: .infinity, alignment: .top)
 
                     // 오른쪽 — 스테이지 목록 (중앙 640pt 제한)
                     ScrollView(showsIndicators: false) {
@@ -139,6 +175,67 @@ struct ChapterView: View {
         }
     }
 
+    // MARK: - 와이드(아이폰 가로모드) 챕터 카드 헤더
+    // 맥 ChapterBrowsePane·아이패드 IPadChapterBrowsePane의 chapterColorHeader와 동일한
+    // "작은 둥근 카드 + 앞/뒤 2겹 depth" 스타일 — 세로모드 chapterHeader(풀블리드 배너)와는 별개
+
+    private var wideChapterHeaderCard: some View {
+        let depth: CGFloat = 5
+        let total = vm.totalStars()
+        let maxStar = vm.stages.count * 3
+
+        return VStack(alignment: .leading, spacing: 6) {
+            Text("CHAPTER \(String(format: "%02d", vm.chapter))")
+                .font(.system(size: 11, weight: .bold)).foregroundStyle(.white.opacity(0.7)).tracking(1)
+            Text(vm.chapterTitle).font(.system(size: 24, weight: .bold)).foregroundStyle(.white)
+
+            HStack(alignment: .top, spacing: 8) {
+                // 별이 많은 챕터는 한 줄에 다 안 들어가므로 자동으로 다음 줄로 감싸는 레이아웃 사용
+                chapterWrappingStarRow(earned: total, total: maxStar, size: 9, spacing: 2, lineSpacing: 4)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                VStack(alignment: .trailing, spacing: 0) {
+                    Text("\(total) / \(maxStar)")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(.white)
+                    Text("stars")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.white.opacity(0.7))
+                }
+                .fixedSize()
+            }
+            .padding(.top, 4)
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 16)
+        .padding(.bottom, 16 + depth)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background {
+            ZStack(alignment: .top) {
+                // 뒷면 — 어둡게, depth만큼 아래로 (3D 효과, 맥/아이패드와 동일 기법)
+                RoundedRectangle(cornerRadius: 16).fill(chapterColor)
+                    .overlay(RoundedRectangle(cornerRadius: 16).fill(Color.black.opacity(0.28)))
+                    .padding(.top, depth)
+                // 앞면 — depth만큼 짧게 (뒷면이 아래로 보이게)
+                RoundedRectangle(cornerRadius: 16).fill(chapterColor)
+                    .padding(.bottom, depth)
+            }
+        }
+        .padding(.horizontal, 16)
+    }
+
+    /// 챕터 헤더용 별 행 — WrapLayout으로 감싸서 폭을 넘으면 다음 줄로 자동 배치
+    /// (세로모드 starProgressBar·가로모드 wideChapterHeaderCard 공용, 맥 macWrappingStarRow·
+    ///  아이패드 wrappingStarRow와 동일한 로직을 이 파일에 독립 구현)
+    private func chapterWrappingStarRow(earned: Int, total: Int, size: CGFloat, spacing: CGFloat, lineSpacing: CGFloat) -> some View {
+        ChapterWrapLayout(spacing: spacing, lineSpacing: lineSpacing) {
+            ForEach(0..<total, id: \.self) { i in
+                Image(systemName: i < earned ? "star.fill" : "star")
+                    .font(.system(size: size))
+                    .foregroundStyle(i < earned ? Color.starGold : Color.primary.opacity(0.20))
+            }
+        }
+    }
+
     // MARK: - 별 진행도 바
 
     /// 챕터 전체 별 획득 현황을 시각화하는 바 (개별 별 아이콘 + 숫자)
@@ -146,11 +243,12 @@ struct ChapterView: View {
         let total  = vm.totalStars()       // 현재 획득 별
         let maxStar = vm.stages.count * 3  // 챕터 최대 별 수 (스테이지 수 × 3)
 
-        return HStack(alignment: .center, spacing: 8) {
-            // 별 아이콘 — 남은 공간을 채우고, 넘치면 잘림 (스테이지 수 많을수록 별도 많아짐)
-            StarRatingView(earned: total, total: maxStar, size: 10, spacing: 2)
+        return HStack(alignment: .top, spacing: 8) {
+            // 별 아이콘 — 한 줄에 다 안 들어가면 다음 줄로 자동 감싸기
+            // (예전엔 .clipped()로 넘치는 별을 그냥 잘라서 보여줬는데, 스테이지 수 많은 챕터에서
+            // 오른쪽 별 몇 개가 통째로 안 보이는 문제가 있었음 — 와이드 카드 헤더와 동일한 방식으로 통일)
+            chapterWrappingStarRow(earned: total, total: maxStar, size: 10, spacing: 2, lineSpacing: 4)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .clipped()
 
             // 숫자 요약 (X / Y stars) — .fixedSize()로 텍스트가 절대 압축되지 않음
             VStack(alignment: .trailing, spacing: 0) {
@@ -337,6 +435,46 @@ struct ChapterView: View {
             .frame(width: iconSize, height: iconSize)
         }
         .frame(width: iconSize, height: iconSize + topDepth + botDepth)
+    }
+}
+
+// MARK: - ChapterWrapLayout
+/// 자식 뷰를 가로로 채우다가 폭을 넘으면 다음 줄로 감싸는 간단한 flow 레이아웃
+/// 세로모드 starProgressBar·가로모드 wideChapterHeaderCard 공용 (맥 WrapLayout·아이패드 IPadWrapLayout과 동일한 구현)
+private struct ChapterWrapLayout: Layout {
+    var spacing: CGFloat = 4
+    var lineSpacing: CGFloat = 4
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let maxWidth = proposal.width ?? .infinity
+        var x: CGFloat = 0, y: CGFloat = 0, lineHeight: CGFloat = 0
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+            if x > 0, x + size.width > maxWidth {
+                x = 0
+                y += lineHeight + lineSpacing
+                lineHeight = 0
+            }
+            x += size.width + spacing
+            lineHeight = max(lineHeight, size.height)
+        }
+        y += lineHeight
+        return CGSize(width: maxWidth.isFinite ? maxWidth : x, height: y)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        var x = bounds.minX, y = bounds.minY, lineHeight: CGFloat = 0
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+            if x > bounds.minX, x + size.width > bounds.maxX {
+                x = bounds.minX
+                y += lineHeight + lineSpacing
+                lineHeight = 0
+            }
+            subview.place(at: CGPoint(x: x, y: y), proposal: .unspecified)
+            x += size.width + spacing
+            lineHeight = max(lineHeight, size.height)
+        }
     }
 }
 

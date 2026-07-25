@@ -17,6 +17,19 @@ enum LayoutBreakpoint {
     static let wide: CGFloat = 700
 }
 
+// MARK: - 아이패드 판별
+/// 화면 폭이 아니라 "진짜 아이패드 기기인지"를 런타임에 판별
+/// (와이드 폭 기준만으로는 아이폰 가로모드도 같이 걸려서, 아이패드 전용 셸을
+///  아이폰과 확실히 구분하려면 이 idiom 체크가 필요함)
+/// iOS: UIDevice.userInterfaceIdiom으로 판별 / macOS: 해당 개념이 없으므로 항상 false
+var isPadIdiom: Bool {
+    #if os(iOS)
+    UIDevice.current.userInterfaceIdiom == .pad
+    #else
+    false
+    #endif
+}
+
 // MARK: - 플랫폼 호환 View 헬퍼
 // iOS 전용 API를 macOS에서도 컴파일되도록 감싸는 얇은 래퍼 모음
 // (iOS 동작은 기존과 동일하게 유지하고, macOS에서는 대체 동작 또는 no-op 적용)

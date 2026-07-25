@@ -25,9 +25,26 @@ struct ContentView: View {
     @StateObject private var vm = HomeViewModel()
 
     var body: some View {
+        // 아이패드는 맥과 동일한 사이드바 셸 배치를 쓰는 전용 화면으로 완전히 분기
+        // (아이폰·맥은 이 분기를 안 타서 기존 NavigationStack 경로를 그대로 실행함)
+        // IPadContentShell 타입 자체가 #if os(iOS) 전용이라 맥 컴파일에서 참조 자체가 없어야 하므로
+        // 이 분기는 #if os(iOS)로 감싸고, 맥은 else 쪽만 컴파일되게 함
+        #if os(iOS)
+        if isPadIdiom {
+            IPadContentShell()
+        } else {
+            defaultBody
+        }
+        #else
+        defaultBody
+        #endif
+    }
+
+    /// 아이폰(기존 그대로) · 맥이 함께 쓰는 기본 홈 화면 — NavigationStack 기반
+    private var defaultBody: some View {
         // 루트 NavigationStack — path 바인딩으로 화면 전환 관리
         NavigationStack(path: $navPath) {
-            // 화면 폭에 따라 홈 레이아웃 분기 (아이폰: 세로 스택 / 아이패드·맥: 좌우 분할)
+            // 화면 폭에 따라 홈 레이아웃 분기 (아이폰 세로: 세로 스택 / 아이폰 가로·맥: 좌우 분할)
             GeometryReader { geo in
                 if geo.size.width >= LayoutBreakpoint.wide {
                     wideHomeContent

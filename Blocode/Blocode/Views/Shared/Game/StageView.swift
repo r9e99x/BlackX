@@ -117,12 +117,17 @@ struct StageView: View {
     private var loadedBody: some View {
         GeometryReader { geo in
         ZStack(alignment: .top) {
-            // 화면 폭에 따라 레이아웃 분기 — 아이폰: 세로 스택 / 아이패드: 좌우 분할 / 맥: 전용 배치
+            // 화면 폭에 따라 레이아웃 분기 — 아이폰: 세로 스택 / 아이패드: 맥과 동일한 좌우 분할(코드-좌/맵-우) / 맥: 전용 배치
+            // (아이패드는 폭 조건이 아니라 isPadIdiom으로 정확히 걸러서, 아이폰 가로모드는 절대 이 분기를 안 탐)
             if geo.size.width >= LayoutBreakpoint.wide {
                 #if os(macOS)
                 macGameLayout(totalWidth: geo.size.width)
                 #else
-                wideGameLayout(totalWidth: geo.size.width)
+                if isPadIdiom {
+                    iPadGameLayout(totalWidth: geo.size.width)
+                } else {
+                    wideGameLayout(totalWidth: geo.size.width)
+                }
                 #endif
             } else {
                 compactGameLayout
@@ -275,7 +280,8 @@ struct StageView: View {
         }
     }
 
-    // MARK: - 와이드(아이패드·맥) 게임 레이아웃
+    // MARK: - 와이드(아이폰 가로모드) 게임 레이아웃
+    // 아이패드·맥은 각각 iPadGameLayout·macGameLayout을 따로 쓰므로 이 함수는 실질적으로 아이폰 가로모드 전용
 
     /// 좌측(내비게이션+맵+스테이지 정보) / 우측(코드 패널) 분할 레이아웃
     /// - Parameter totalWidth: 전체 화면 폭 — 좌측 열 너비 계산에 사용
@@ -300,7 +306,8 @@ struct StageView: View {
             }
             .frame(width: leftWidth)
 
-            // ── 우측: 코드 패널 (코드 리스트가 남은 높이를 전부 사용) ──
+            // ── 우측: 코드 패널 (확장/축소 토글 없이 항상 펼쳐서 코드 리스트가 남은 높이를 전부 사용) ──
+            // 가로모드는 이미 좌우 분할로 공간이 넉넉해서 세로모드용 축소 기능이 필요 없음
             CodePanelView(
                 viewModel: viewModel,
                 stage: stage,
@@ -313,9 +320,54 @@ struct StageView: View {
                 reorderPosition: $reorderPosition,
                 reorderTargetIndex: $reorderTargetIndex,
                 navPath: $navPath,
-                isPanelExpanded: $isPanelExpanded
+                isPanelExpanded: $isPanelExpanded,
+                alwaysExpanded: true
             )
             .padding(.top, 8)
+        }
+    }
+
+    // MARK: - 아이패드 전용 게임 레이아웃
+    // 맥과 동일한 좌-코드/우-맵 배치(맥 UI 배치 이식) — 색상·컴포넌트는 전부 기존 것 재사용,
+    // CodePanelView 자체는 os(iOS) 컴파일 분기라 기존 iOSBody(확장/축소 토글 + 팔레트 + 컨트롤 바)가
+    // 그대로 렌더링되므로 터치 조작에 필요한 버튼들은 하나도 안 빠짐
+
+    private func iPadGameLayout(totalWidth: CGFloat) -> some View {
+        // 코드 패널 폭 — 화면의 38%를 기준으로 420~520pt 사이로 제한 (맥보다 살짝 넓게 — 터치 팔레트 블럭이 더 큼)
+        let leftWidth = min(max(totalWidth * 0.38, 420), 520)
+
+        return VStack(spacing: 0) {
+            navigationBar
+
+            HStack(spacing: 0) {
+                // 좌측 — 코드 패널 (코드 리스트가 남은 높이를 전부 사용 = 세로로 길게)
+                CodePanelView(
+                    viewModel: viewModel,
+                    stage: stage,
+                    dragType: $dragType,
+                    dragPosition: $dragPosition,
+                    dragInsertIndex: $dragInsertIndex,
+                    codeListFrame: $codeListFrame,
+                    rowMidYs: $rowMidYs,
+                    reorderIndex: $reorderIndex,
+                    reorderPosition: $reorderPosition,
+                    reorderTargetIndex: $reorderTargetIndex,
+                    navPath: $navPath,
+                    isPanelExpanded: $isPanelExpanded
+                )
+                .frame(width: leftWidth)
+
+                // 우측 — 정사각형 맵 (상한선 없이 남은 공간을 가득 채우고 가운데 정렬)
+                VStack(spacing: 0) {
+                    Spacer(minLength: 0)
+                    mapView
+                        .aspectRatio(1.0, contentMode: .fit)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 4)
+                    Spacer(minLength: 0)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
         }
     }
 
@@ -470,7 +522,7 @@ struct StageView: View {
     #if os(macOS)
     // MARK: - 맥 전용 게임 레이아웃
     // 좌: 코드 패널(팔레트 위/코드 아래, 폭은 좁게 고정하고 세로로 길게) / 우: 정사각 맵(남은 공간)
-    // (아이패드는 기존 wideGameLayout을 그대로 사용 — 이 함수는 macOS 빌드에만 존재)
+    // (아이패드는 동일한 좌-코드/우-맵 배치를 쓰는 iPadGameLayout을 별도로 둠 — 이 함수는 macOS 빌드에만 존재)
 
     private func macGameLayout(totalWidth: CGFloat) -> some View {
         // 코드 패널 폭 — 화면의 36%를 기준으로 400~480pt 사이로 제한
