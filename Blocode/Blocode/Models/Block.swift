@@ -111,9 +111,6 @@ enum BlockType: String, Codable, CaseIterable {
     var lightColor: Color {
         blockColor.opacity(0.12)
     }
-
-    /// 최소화 칩에 쓸 작은 아이콘 (iconName과 동일하지만 alias로 명시)
-    var shortIconName: String { iconName }
 }
 
 // MARK: - Block

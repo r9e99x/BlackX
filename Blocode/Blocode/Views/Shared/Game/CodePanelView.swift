@@ -59,23 +59,12 @@ struct CodePanelView: View {
                     dragHandle
                 }
 
-                if alwaysExpanded || isPanelExpanded {
-                    // ─── 확장 상태: 코드 리스트 헤더 + 리스트 ───
-                    codeListHeader
-                    codeBlockList
-                    Spacer(minLength: 8)
-                } else {
-                    // ─── 최소화 상태: 가로 칩 요약 + 남은 공간을 흡수하는 Spacer ───
-                    // 예전엔 이 공간을 StageView의 외부 Spacer가 흡수해서 맵과 카드 사이에
-                    // 빈 배경만 보였는데, 이제 카드 내부에서 흡수하므로 카드 자체가 팔레트
-                    // 바로 위까지 자연스럽게 늘어나 보임(맵-카드 사이 빈 공간 제거)
-                    Group {
-                        collapsedChipRow
-                            .padding(.bottom, 6)
-                        Spacer(minLength: 0)
-                    }
-                    .transition(.opacity.combined(with: .move(edge: .bottom)))
-                }
+                // 확장/축소 상태 모두 동일한 코드 리스트를 그대로 표시(드래그 삽입·순서 변경·삭제·스크롤 전부 유지) —
+                // 두 상태의 차이는 StageView 쪽에서 맵 크기를 늘렸다 줄였다 해서 이 카드에 남는 세로 공간이
+                // 달라지는 것뿐, CodePanelView 내부에서 다른 뷰로 바꿔치기하지 않음
+                codeListHeader
+                codeBlockList
+                Spacer(minLength: 8)
             }
             .background(Color.panelBackground)
             .clipShape(RoundedRectangle(cornerRadius: 24))
@@ -382,68 +371,6 @@ struct CodePanelView: View {
                 .onAppear { codeListFrame = geo.frame(in: .global) }
                 .onChange(of: geo.frame(in: .global)) { codeListFrame = geo.frame(in: .global) }
         })
-    }
-
-    // MARK: - 최소화 상태 칩 요약 뷰
-
-    /// 패널 최소화 시 블럭들을 작은 칩 형태로 가로 스크롤로 표시
-    private var collapsedChipRow: some View {
-        HStack(spacing: 0) {
-            // 가로 스크롤 칩 행
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 6) {
-                    if viewModel.codeBlocks.isEmpty {
-                        // 블럭 없음 안내
-                        Text("블럭 없음")
-                            .font(.system(size: 12))
-                            .foregroundStyle(.tertiary)
-                    } else {
-                        // 각 블럭을 작은 칩으로 표시
-                        ForEach(Array(viewModel.codeBlocks.enumerated()), id: \.element.id) { _, block in
-                            blockChip(block)
-                        }
-                    }
-                }
-                .padding(.vertical, 6)
-                .padding(.leading, 16)
-            }
-
-            // 블럭 수 뱃지 — 스크롤 영역 오른쪽에 고정
-            HStack(spacing: 4) {
-                Text("\(viewModel.totalBlockCount)")
-                    .font(.system(size: 11, weight: .bold, design: .monospaced))
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Color.tertiaryBackground)
-                    .clipShape(Capsule())
-                Text("blocks")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(.tertiary)
-            }
-            .padding(.leading, 8)
-            .padding(.trailing, 16)
-        }
-        .frame(height: 36)
-    }
-
-    /// 블럭 하나를 작은 캡슐 칩으로 표시 — 아이콘 (+ repeat 횟수)
-    private func blockChip(_ block: Block) -> some View {
-        HStack(spacing: 3) {
-            Image(systemName: block.type.shortIconName)
-                .font(.system(size: 11, weight: .bold))
-                .foregroundStyle(.white)
-            // repeat 블럭은 반복 횟수도 표시
-            if block.type == .repeatBlock {
-                Text("×\(block.repeatCount ?? 2)")
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundStyle(.white)
-            }
-        }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 5)
-        .background(block.type.blockColor)
-        .clipShape(Capsule())
     }
 
     // MARK: - 삽입 인디케이터

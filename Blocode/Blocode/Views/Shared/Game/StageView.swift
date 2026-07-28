@@ -45,7 +45,7 @@ struct StageView: View {
     @State private var reorderTargetIndex: Int = 0       // 놓일 예상 인덱스
 
     /// 코드 패널 확장 여부 — 맵 크기 조절 및 하단 고정용 Spacer와 연동되므로 StageView에서 관리
-    @State private var isPanelExpanded = true
+    @State private var isPanelExpanded = false
 
     @Environment(\.colorScheme) private var colorScheme  // 다크/라이트 모드 감지
 
@@ -353,7 +353,8 @@ struct StageView: View {
                     reorderPosition: $reorderPosition,
                     reorderTargetIndex: $reorderTargetIndex,
                     navPath: $navPath,
-                    isPanelExpanded: $isPanelExpanded
+                    isPanelExpanded: $isPanelExpanded,
+                    alwaysExpanded: true  // 아이패드는 좌우 분할로 공간이 넉넉해 확장/축소 토글 자체가 불필요
                 )
                 .frame(width: leftWidth)
 
