@@ -359,8 +359,7 @@ struct CodePanelView: View {
                 }
             }
         }
-        // 이 뷰가 렌더링되는 시점은 항상 isPanelExpanded == true(그 외엔 collapsedChipRow가 대신 표시됨)라,
-        // 플랫폼/화면 폭 구분 없이 항상 남은 세로 공간을 전부 사용 — 아이폰은 StageView가 확장 시 맵을 줄여서
+        // 확장/축소 상태와 무관하게 항상 남은 세로 공간을 전부 사용 — 아이폰은 StageView가 확장 시 맵을 줄여서
         // 이 공간을 만들어줌(예전엔 고정 160pt라 블럭이 많아지면 좁은 창 안에서만 스크롤됐음)
         .frame(maxHeight: .infinity)
         // 코드 리스트 글로벌 프레임 추적 (드래그 감지용)

@@ -6,19 +6,46 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		9EE234C0AB9F1522AEE48281 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F47181252FB0477000E91AFE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F471812C2FB0477000E91AFE;
+			remoteInfo = Blocode;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		8947C1218FEC36DFC639D627 /* BlocodeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BlocodeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F471812D2FB0477000E91AFE /* Blocode.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Blocode.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		B7B85BFA4CDC99CEA48B2EAA /* BlocodeTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			path = BlocodeTests;
+			sourceTree = "<group>";
+		};
 		F471812F2FB0477000E91AFE /* Blocode */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = Blocode;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		46E1F29029966F091B162F33 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F471812A2FB0477000E91AFE /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -34,6 +61,7 @@
 			children = (
 				F471812F2FB0477000E91AFE /* Blocode */,
 				F471812E2FB0477000E91AFE /* Products */,
+				B7B85BFA4CDC99CEA48B2EAA /* BlocodeTests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -41,6 +69,7 @@
 			isa = PBXGroup;
 			children = (
 				F471812D2FB0477000E91AFE /* Blocode.app */,
+				8947C1218FEC36DFC639D627 /* BlocodeTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,6 +77,27 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		277F55554B958019E41F237C /* BlocodeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6A8AD728E3097F12689BE217 /* Build configuration list for PBXNativeTarget "BlocodeTests" */;
+			buildPhases = (
+				5195D98139DC283E682F2595 /* Sources */,
+				46E1F29029966F091B162F33 /* Frameworks */,
+				B17AD56631A159F585F3CE94 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				706D3D8497B458634355330F /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				B7B85BFA4CDC99CEA48B2EAA /* BlocodeTests */,
+			);
+			name = BlocodeTests;
+			productName = BlocodeTests;
+			productReference = 8947C1218FEC36DFC639D627 /* BlocodeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		F471812C2FB0477000E91AFE /* Blocode */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = F471813A2FB0477300E91AFE /* Build configuration list for PBXNativeTarget "Blocode" */;
@@ -64,8 +114,6 @@
 				F471812F2FB0477000E91AFE /* Blocode */,
 			);
 			name = Blocode;
-			packageProductDependencies = (
-			);
 			productName = Blocode;
 			productReference = F471812D2FB0477000E91AFE /* Blocode.app */;
 			productType = "com.apple.product-type.application";
@@ -80,6 +128,10 @@
 				LastSwiftUpdateCheck = 2640;
 				LastUpgradeCheck = 2640;
 				TargetAttributes = {
+					277F55554B958019E41F237C = {
+						CreatedOnToolsVersion = 26.4.1;
+						TestTargetID = F471812C2FB0477000E91AFE;
+					};
 					F471812C2FB0477000E91AFE = {
 						CreatedOnToolsVersion = 26.4.1;
 					};
@@ -100,11 +152,19 @@
 			projectRoot = "";
 			targets = (
 				F471812C2FB0477000E91AFE /* Blocode */,
+				277F55554B958019E41F237C /* BlocodeTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		B17AD56631A159F585F3CE94 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F471812B2FB0477000E91AFE /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -115,6 +175,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		5195D98139DC283E682F2595 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F47181292FB0477000E91AFE /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -124,7 +191,63 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		706D3D8497B458634355330F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F471812C2FB0477000E91AFE /* Blocode */;
+			targetProxy = 9EE234C0AB9F1522AEE48281 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		626988770D1870F21825ED81 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.r9e99x.BlocodeTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Blocode.app/Contents/MacOS/Blocode";
+			};
+			name = Debug;
+		};
+		62D72FA01E8E676D7919892D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.r9e99x.BlocodeTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Blocode.app/Contents/MacOS/Blocode";
+			};
+			name = Release;
+		};
 		F47181382FB0477300E91AFE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -326,6 +449,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		6A8AD728E3097F12689BE217 /* Build configuration list for PBXNativeTarget "BlocodeTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				626988770D1870F21825ED81 /* Debug */,
+				62D72FA01E8E676D7919892D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		F47181282FB0477000E91AFE /* Build configuration list for PBXProject "Blocode" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
